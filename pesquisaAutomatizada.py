@@ -1,3 +1,5 @@
+import time
+
 from selenium import webdriver
 from requests_html import HTMLSession
 
@@ -13,11 +15,17 @@ if response.status_code == 200:
     print("Application title is", title)
     print("Application URL is", url)
 
-    driver = webdriver.Chrome()
-    driver.maximize_window()
-    driver.get("https://www.tce.sp.gov.br/jurisprudencia/")
-    print("Application title is", driver.title)
-    print("Application URL is", driver.current_url)
+    navegador = webdriver.Chrome()
+    navegador.maximize_window()
+    navegador.get("https://www.tce.sp.gov.br/jurisprudencia/")
+    print("Application title is", navegador.title)
+    print("Application URL is", navegador.current_url)
+
+    navegador.find_element('xpath','/html/body/form/div/div[2]/div[2]/div[1]/div/input').send_keys('fraude em escolas')
+
+    navegador.find_element('xpath','/html/body/form/div/div[2]/div[3]/div[9]/div/input[1]').click()
+
+    time.sleep(50)
 else:
     print("Failed to fetch the webpage")
 
