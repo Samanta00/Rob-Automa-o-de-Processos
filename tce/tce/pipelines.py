@@ -15,8 +15,13 @@ load_dotenv()
 
 MYSQL_HOST = os.getenv("MYSQL_HOST")
 MYSQL_DB = os.getenv("MYSQL_DB")
-MYSQL_USER = os.getenv("MYSQL_USER")
 MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
+MYSQL_PORT= os.getenv("MYSQL_PORT")
+
+
+print("MYSQL_HOST:", MYSQL_HOST)
+print("MYSQL_DB:", MYSQL_DB)
+print("MYSQL_PASSWORD:", MYSQL_PASSWORD)
 
 
 class TcePipeline:
@@ -25,34 +30,64 @@ class TcePipeline:
 
 
 class savingToMysqlPipeline(object):
-
     def __init__(self):
         self.create_connection()
 
     def create_connection(self):
         try:
-            connection = mysql.connector.connect(
-                host=os.getenv("MYSQL_HOST"),
-                database=os.getenv("MYSQL_DB"),
-                user=os.getenv("MYSQL_USER"),
-                password=os.getenv("MYSQL_PASSWORD")
+            self.connection = mysql.connector.connect(
+                host=MYSQL_HOST,
+                port=MYSQL_PORT,
+                database=MYSQL_DB,
+                username='root',
+                password=MYSQL_PASSWORD
             )
-            if connection.is_connected():
-                db_Info = connection.get_server_info()
+            if self.connection.is_connected():
+                db_Info = self.connection.get_server_info()
                 print("Connected to MySQL Server version ", db_Info)
-                cursor = connection.cursor()
+                cursor = self.connection.cursor()
                 cursor.execute("select database();")
                 record = cursor.fetchone()
                 print("You're connected to database: ", record)
-
+                cursor.close()
         except Error as e:
             print("Error while connecting to MySQL", e)
-        finally:
-            if connection.is_connected():
-                cursor.close()
-                connection.close()
-                print("MySQL connection is closed")
+            self.connection = None
+
+    def create_table(self):
+        try:
+            cursor = self.connection.cursor()
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS armazenamento_registros_tce (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    doc VARCHAR(255),
+                    Nprocesso VARCHAR(255),
+                    dataAtuacao VARCHAR(255),
+                    partes TEXT,
+                    materia TEXT,
+                    url TEXT,
+                    ementa TEXT
+                )
+            """)
+            self.connection.commit()
+            print("Table 'armazenamento_registros_tce' created successfully")
+        except Error as e:
+            print("Error while creating table:", e)
 
     def process_item(self, item, spider):
-        self.create_connection()
+        try:
+            cursor = self.connection.cursor()
+            cursor.execute("""
+                INSERT INTO armazenamento_registros_tce (doc, Nprocesso, dataAtuacao, partes, materia, url, ementa)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (item['doc'], item['Nprocesso'], item['dataAtuacao'], item['partes'], item['materia'], item['url'], item['ementa']))
+            self.connection.commit()
+            print("Record inserted successfully")
+        except Error as e:
+            print("Error while inserting record:", e)
         return item
+
+    def close_spider(self, spider):
+        if self.connection and self.connection.is_connected():
+            self.connection.close()
+            print("MySQL connection is closed")
