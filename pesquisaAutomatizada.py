@@ -1,5 +1,5 @@
 import time
-
+import scrapy
 from selenium import webdriver
 from requests_html import HTMLSession
 
@@ -22,7 +22,7 @@ if response.status_code == 200:
     print("Application URL is", navegador.current_url)
 
     navegador.find_element('xpath','/html/body/form/div/div[2]/div[2]/div[1]/div/input').send_keys('fraude em escolas')
-
+    navegador.find_element('xpath','//*[@id="exercicio"]').send_keys('2023,2022')
     navegador.find_element('xpath','/html/body/form/div/div[2]/div[3]/div[9]/div/input[1]').click()
 
     time.sleep(50)
