@@ -28,10 +28,10 @@ class TcePipeline:
     def process_item(self, item, spider):
         return item
 
-
 class savingToMysqlPipeline(object):
     def __init__(self):
         self.create_connection()
+        self.create_table() 
 
     def create_connection(self):
         try:
@@ -49,6 +49,7 @@ class savingToMysqlPipeline(object):
                 cursor.execute("select database();")
                 record = cursor.fetchone()
                 print("You're connected to database: ", record)
+                cursor.execute("USE registros_tce ")  
                 cursor.close()
         except Error as e:
             print("Error while connecting to MySQL", e)
@@ -77,10 +78,12 @@ class savingToMysqlPipeline(object):
     def process_item(self, item, spider):
         try:
             cursor = self.connection.cursor()
+            partes_str = ", ".join(item['partes'])
+
             cursor.execute("""
                 INSERT INTO armazenamento_registros_tce (doc, Nprocesso, dataAtuacao, partes, materia, url, ementa)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
-            """, (item['doc'], item['Nprocesso'], item['dataAtuacao'], item['partes'], item['materia'], item['url'], item['ementa']))
+            """, (item['doc'], item['Nprocesso'], item['dataAtuacao'], partes_str, item['materia'], item['url'], item['ementa']))
             self.connection.commit()
             print("Record inserted successfully")
         except Error as e:
