@@ -30,8 +30,10 @@ class TcePipeline:
 
 class savingToMysqlPipeline(object):
     def __init__(self):
+        self.connection = None
         self.create_connection()
-        self.create_table() 
+        if self.connection:
+            self.create_table() 
 
     def create_connection(self):
         try:
@@ -53,7 +55,6 @@ class savingToMysqlPipeline(object):
                 cursor.close()
         except Error as e:
             print("Error while connecting to MySQL", e)
-            self.connection = None
 
     def create_table(self):
         try:
@@ -74,6 +75,7 @@ class savingToMysqlPipeline(object):
             print("Table 'armazenamento_registros_tce' created successfully")
         except Error as e:
             print("Error while creating table:", e)
+            self.connection = None
 
     def process_item(self, item, spider):
         try:
