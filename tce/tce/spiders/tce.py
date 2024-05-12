@@ -5,7 +5,8 @@ from requests_html import HTMLSession
 import pandas as pd
 import logging
 from tce.pipelines import savingToMysqlPipeline
-from .registrando import RegistrandoInformacoes
+from tce.pipelines import savingToMysqlPipeline;
+
 
 def parse_date(date_string):
 
@@ -59,34 +60,34 @@ class TceSpider(scrapy.Spider):
             logging.error("Failed to fetch the webpage: %s", e)
     
     def parse(self, response):
-        dados = []
-    
         for index, doc in enumerate(response.css('.small:nth-child(1) a')):
             doc_text = doc.css('::text').get().strip()
             url = doc.css('::attr(href)').get()
             n_processo = response.css('.small+ .small a ::text')[index].get()
             data_atuacao_raw = response.css('.small:nth-child(3) ::text')[index].getall()
-           
+        
             data_atuacao = parse_date(data_atuacao_raw[0]) if data_atuacao_raw else None
 
             partes = response.css('.small:nth-child(4) ::text')[index].getall() + response.css('.small:nth-child(5) ::text')[index].getall()
+            
             materiaraw = response.css('.small:nth-child(6) ::text')[index].getall()
             materia = materiaraw[0] if materiaraw else None
-           
+        
             ementaraw = response.css('.small:nth-child(7) ::text')[index].getall()
             ementa=ementaraw[0] if ementaraw else None
 
-            dados.append({
+            item = {
                 "doc": doc_text,
                 "Nprocesso": n_processo,
                 "dataAtuacao": data_atuacao,
                 "partes": partes,
                 "materia": materia,
                 "url": url,
-                "ementa":ementa
-            })
+                "ementa": ementa
+            }
 
-            df = pd.DataFrame(dados)
-            df.to_excel('dados_tce.xlsx', index=False)
-            # info = RegistrandoInformacoes(doc_text, n_processo, data_atuacao, partes, materia, url, ementa)
-            # info.salvar_no_banco_de_dados()
+            # Criação de uma instância do pipeline
+            pipeline = savingToMysqlPipeline()
+
+            # Processando o item individualmente para enviar ao banco de dados
+            pipeline.process_item(item, None)
