@@ -34,7 +34,8 @@
 
 
 ### o projeto vai se abrir e arquitetura original dele é essa:
-![image](https://github.com/Samanta00/Robo-Automatizador-de-Processos/assets/80990432/f2a58291-7ca8-45cc-9bb0-e4eb84141480)
+![image](https://github.com/Samanta00/Robo-Automatizador-de-Processos/assets/80990432/f73edf41-f763-402d-afe4-be55a975254c)
+
 
 ### note que existem arquivos .env, esse arquivo é onde será configurada a estrutura de conexão com o banco de dados, porém como essa conexão é realizada pelo docker você só precisa mudar a senha para uma mais forte, caso você deseje
 
