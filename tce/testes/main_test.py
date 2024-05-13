@@ -20,7 +20,7 @@ class TestMyPipeline(unittest.TestCase):
 
     def test_is_valid_date_format_invalid(self):
         # Testa se a função is_valid_date_format retorna False para uma data no formato incorreto
-        date_str = '2024-05-11'
+        date_str = '2024/05/11'
         self.assertFalse(self.pipeline.is_valid_date_format(date_str))
 
     def test_is_valid_valid_item(self):
@@ -63,7 +63,7 @@ class TestMyPipeline(unittest.TestCase):
         self.pipeline.process_item(invalid_item, None)
         mock_print.assert_called_once_with('Item inválido:', invalid_item)
 
-    # Outros testes podem ser adicionados conforme necessário
+   
 
 if __name__ == '__main__':
     unittest.main()
