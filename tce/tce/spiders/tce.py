@@ -1,3 +1,4 @@
+import json
 import logging
 import time
 from selenium import webdriver
@@ -75,9 +76,20 @@ class TceSpider(scrapy.Spider):
                 "url": url,
                 "ementa": ementa
             }
+
+            #O robô será responsável por extrair todos os documentos do site do TCE-SP, que sejam relacionados a “fraude em escolas” salvar esses dados em um formato adequado (por exemplo JSON). 
+            self.save_to_json(item)
+
+
             # Criação de uma instância do pipeline
             pipeline = SavingToMysqlPipeline()
 
             # Processando o item individualmente para enviar ao banco de dados
             pipeline.process_item(item, None)
 
+            
+    def save_to_json(self, item):
+        # Adicionar o item ao arquivo JSON
+        with open('dados.json', 'a') as json_file:
+            json.dump(item, json_file)
+            json_file.write('\n')
