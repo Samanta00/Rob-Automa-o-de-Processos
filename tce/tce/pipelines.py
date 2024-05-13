@@ -28,13 +28,15 @@ class TcePipeline:
     def process_item(self, item, spider):
         return item
 
-class savingToMysqlPipeline(object):
+class SavingToMysqlPipeline(object):
     def __init__(self):
         self.connection = None
         self.create_connection()
         if self.connection:
             self.create_table() 
 
+
+#código realiza conexão ao banco de dados e valida se a conexão foi bem sucedida, ele vai puxar os valores no arquivo .env
     def create_connection(self):
         try:
             self.connection = mysql.connector.connect(
@@ -56,6 +58,7 @@ class savingToMysqlPipeline(object):
         except Error as e:
             print("Error while connecting to MySQL", e)
 
+    # caso a tabela ainda não exista no banco de dados o código vai criar uma nova
     def create_table(self):
         try:
             cursor = self.connection.cursor()
@@ -77,6 +80,7 @@ class savingToMysqlPipeline(object):
             print("Error while creating table:", e)
             self.connection = None
 
+#código está inserindo os registros no banco de dados
     def process_item(self, item, spider):
         try:
             cursor = self.connection.cursor()
